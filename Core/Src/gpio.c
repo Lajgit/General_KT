@@ -63,20 +63,15 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(LED_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : Button6_Pin Button1_Pin Button2_Pin Button3_Pin
-                           Encoder_K_Pin */
-  GPIO_InitStruct.Pin = Button6_Pin|Button1_Pin|Button2_Pin|Button3_Pin
-                          |Encoder_K_Pin;
+  /* 摇杆四路、拍拍按键前三路：外部上拉，低电平有效。 */
+  GPIO_InitStruct.Pin = Joystick_Down_Pin|Joystick_Up_Pin|Joystick_Right_Pin
+                          |Joystick_Left_Pin|Button1_Pin|Button2_Pin|Button3_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : Button5_Pin KeyBoard1_Pin KeyBoard2_Pin KeyBoard3_Pin
-                           KeyBoard4_Pin Button4_Pin */
-  GPIO_InitStruct.Pin = Button5_Pin|KeyBoard1_Pin|KeyBoard2_Pin|KeyBoard3_Pin
-                          |KeyBoard4_Pin|Button4_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  /* 拍拍按键后三路、两路扩展按键。 */
+  GPIO_InitStruct.Pin = Button4_Pin|Button5_Pin|Button6_Pin|KeyBoard1_Pin|KeyBoard2_Pin;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /*Configure GPIO pins : SPI2_OE_Pin SPI2_LE_Pin */

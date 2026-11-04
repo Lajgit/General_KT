@@ -34,7 +34,6 @@ typedef enum
 {
     WAIT_HEAD = 0,
     RECEIVE_DATA,
-    WAIT_TAIL,
 } RxFSM_State;
 
 /// @brief 串口接收模块句柄结构体

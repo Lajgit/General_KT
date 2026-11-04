@@ -1,0 +1,3 @@
+# 本地验证与固件构建产物
+/build/
+/verification/__pycache__/

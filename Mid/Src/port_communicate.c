@@ -38,54 +38,45 @@ void Communicate_Tx_Init(Tx_HandleTypeDef *Handle, Tx_InitTypeDef Tx_Init)
  * ================================RX=========================================
  */
 
+/* 固定长度解帧，数据区或 CRC 中的 0xAA/0x55 不作为分隔符。 */
 void Rx_Receive(void *self, void *mesg, uint8_t mesg_len)
 {
     Rx_HandleTypeDef *rx = (Rx_HandleTypeDef *)self;
-    while (rx->Handle.RingBuf.f_IsEmpty(&rx->Handle.RingBuf) == false)
+    if (mesg == NULL || mesg_len < 2 || mesg_len > rx->Queue.Buf_Size)
+        return;
+
+    while (rx->Handle.RingBuf.f_ReadByte(&rx->Handle.RingBuf, &rx->CurrData))
     {
-        /// 从环形缓冲区中读取一个字节，并根据当前状态进行处理
-        if (rx->Handle.RingBuf.f_ReadByte(&rx->Handle.RingBuf, &rx->CurrData) == true)
+        if (rx->State == WAIT_HEAD)
         {
-            switch (rx->State)
-            {
-            /// 等待帧头阶段，只有在接收到正确的帧头时才开始接收数据
-            case WAIT_HEAD:
-                if (rx->CurrData == rx->Frame_Head)
-                {
-                    rx->Queue.Index = 0;
-                    rx->Queue.Buf[rx->Queue.Index] = rx->CurrData;
-                    rx->State = RECEIVE_DATA;
-                    rx->Queue.Index++;
-                }
-                break;
-            /// 接收数据阶段，直到接收到帧尾或队列满
-            case RECEIVE_DATA:
-                // 若队列未满，继续存储数据；否则放弃当前帧并重同步
-                if (rx->Queue.Index < rx->Queue.Buf_Size)
-                    rx->Queue.Buf[rx->Queue.Index] = rx->CurrData;
-                else
-                    rx->State = WAIT_HEAD;
-                // 若接收到帧尾且帧长度符合条件，进行解包和处理，并重置状态以接收下一帧
-                if (rx->CurrData == rx->Frame_Tail && rx->Queue.Index >= mesg_len - 1)
-                {
-                    rx->State = WAIT_HEAD;
-                    memcpy(mesg, rx->Queue.Buf, mesg_len);
-                    /// 解包并处理
-                    if (rx->Verify != NULL)
-                    {
-                        if (rx->Verify(rx, mesg) == true)
-                            if (rx->Deal != NULL)
-                                rx->Deal(mesg);
-                    }
-                    else
-                    {
-                        if (rx->Deal != NULL)
-                            rx->Deal(mesg);
-                    }
-                }
-                rx->Queue.Index++;
-                break;
-            }
+            if (rx->CurrData != rx->Frame_Head)
+                continue;
+            rx->Queue.Index = 0;
+            rx->State = RECEIVE_DATA;
+        }
+        rx->Queue.Buf[rx->Queue.Index++] = rx->CurrData;
+        if (rx->Queue.Index != mesg_len)
+            continue;
+
+        /* 收满一帧再验证，旧灯光帧也完整消费，避免影响下一帧。 */
+        memcpy(mesg, rx->Queue.Buf, mesg_len);
+        if (rx->Queue.Buf[mesg_len - 1] == rx->Frame_Tail &&
+            (rx->Verify == NULL || rx->Verify(rx, mesg)))
+        {
+            rx->State = WAIT_HEAD;
+            rx->Queue.Index = 0;
+            if (rx->Deal != NULL)
+                rx->Deal(mesg);
+        }
+        else
+        {
+            /* 丢字节或 CRC 错误时，从缓冲区内下一个帧头重新同步。 */
+            uint8_t next = 1;
+            while (next < mesg_len && rx->Queue.Buf[next] != rx->Frame_Head)
+                next++;
+            rx->Queue.Index = mesg_len - next;
+            memmove(rx->Queue.Buf, rx->Queue.Buf + next, rx->Queue.Index);
+            rx->State = rx->Queue.Index == 0 ? WAIT_HEAD : RECEIVE_DATA;
         }
     }
 }

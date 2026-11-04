@@ -89,6 +89,7 @@ static bool DigitalTube_SetNum(uint8_t positon, uint32_t data, uint8_t datasize,
             DigitalTube_Setbit(positon + datasize - i, num, buffer, buffersize, code);
         data /= 10;
     }
+    return true; // 所有位均设置成功
 }
 
 /*

@@ -2,21 +2,20 @@
 #include "MesgTask.h"
 #include "MainTask.h"
 #include "CommTask.h"
-#include "LightTask.h"
 #include "port_key.h"
 #include "port_event.h"
 
-static GPIO_TypeDef *Button_GPIO[7] = {Button1_GPIO_Port, Button2_GPIO_Port, Button3_GPIO_Port, Button4_GPIO_Port, Button5_GPIO_Port, Button6_GPIO_Port, Encoder_K_GPIO_Port};
-static uint16_t Button_Pin[7] = {Button1_Pin, Button2_Pin, Button3_Pin, Button4_Pin, Button5_Pin, Button6_Pin, Encoder_K_Pin};
+static GPIO_TypeDef *Button_GPIO[6] = {Button1_GPIO_Port, Button2_GPIO_Port, Button3_GPIO_Port, Button4_GPIO_Port, Button5_GPIO_Port, Button6_GPIO_Port};
+static uint16_t Button_Pin[6] = {Button1_Pin, Button2_Pin, Button3_Pin, Button4_Pin, Button5_Pin, Button6_Pin};
 
-static GPIO_TypeDef *Keyboard_GPIO[4] = {KeyBoard1_GPIO_Port, KeyBoard2_GPIO_Port, KeyBoard3_GPIO_Port, KeyBoard4_GPIO_Port};
-static uint16_t Keyboard_Pin[4] = {KeyBoard1_Pin, KeyBoard2_Pin, KeyBoard3_Pin, KeyBoard4_Pin};
+static GPIO_TypeDef *Keyboard_GPIO[2] = {KeyBoard1_GPIO_Port, KeyBoard2_GPIO_Port};
+static uint16_t Keyboard_Pin[2] = {KeyBoard1_Pin, KeyBoard2_Pin};
 
-static Key_HandleTypeDef Button_Key[7];
-static Key_HandleTypeDef *Button_List[7];
+static Key_HandleTypeDef Button_Key[6];
+static Key_HandleTypeDef *Button_List[6];
 
-static Key_HandleTypeDef Keyboard_Key[4];
-static Key_HandleTypeDef *Keyboard_List[4];
+static Key_HandleTypeDef Keyboard_Key[2];
+static Key_HandleTypeDef *Keyboard_List[2];
 
 extern Event_Handle_t Mesg_event;
 extern Event_Handle_t Event;
@@ -45,7 +44,7 @@ static void Button_Init(void)
     Key_InitStruct.release_callback = NULL;
     Key_InitStruct.trigger_level = GPIO_PIN_RESET;
 
-    for (uint8_t i = 0; i < 7; i++)
+    for (uint8_t i = 0; i < 6; i++)
     {
         Key_InitStruct.key_id = i;
         Key_InitStruct.port = Button_GPIO[i];
@@ -72,7 +71,7 @@ static void Keyboard_Init(void)
     Key_InitStruct.release_callback = NULL;
     Key_InitStruct.trigger_level = GPIO_PIN_RESET;
 
-    for (uint8_t i = 0; i < 4; i++)
+    for (uint8_t i = 0; i < 2; i++)
     {
         Key_InitStruct.key_id = i;
         Key_InitStruct.port = Keyboard_GPIO[i];
@@ -89,6 +88,7 @@ void KeyAll_Init(void)
 
 void Key_Task(void)
 {
-    /* 只允许PA5/PA7/PA10（Button1～Button3，对应K8～K10）上报。 */
-    Key_Scan(Button_List, 3);
+    /* 按原理图扫描全部六路拍拍按键和两路扩展按键。 */
+    Key_Scan(Button_List, 6);
+    Key_Scan(Keyboard_List, 2);
 }

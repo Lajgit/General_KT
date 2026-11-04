@@ -398,11 +398,6 @@
               <FilePath>../Core/Src/gpio.c</FilePath>
             </File>
             <File>
-              <FileName>dma.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Core/Src/dma.c</FilePath>
-            </File>
-            <File>
               <FileName>iwdg.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Core/Src/iwdg.c</FilePath>
@@ -637,11 +632,6 @@
               <FilePath>..\Lib\Src\app_ringbuf.c</FilePath>
             </File>
             <File>
-              <FileName>app_ws2812.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Lib\Src\app_ws2812.c</FilePath>
-            </File>
-            <File>
               <FileName>softspi.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Lib\Src\softspi.c</FilePath>
@@ -676,16 +666,6 @@
               <FileType>1</FileType>
               <FilePath>..\Mid\Src\port_key.c</FilePath>
             </File>
-            <File>
-              <FileName>port_light.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Mid\Src\port_light.c</FilePath>
-            </File>
-            <File>
-              <FileName>port_lighteffect.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Mid\Src\port_lighteffect.c</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>
@@ -715,11 +695,6 @@
               <FileName>KeyTask.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Task\Src\KeyTask.c</FilePath>
-            </File>
-            <File>
-              <FileName>LightTask.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Task\Src\LightTask.c</FilePath>
             </File>
             <File>
               <FileName>MainTask.c</FileName>

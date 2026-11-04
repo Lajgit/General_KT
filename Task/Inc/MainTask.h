@@ -11,15 +11,6 @@
 #define Event_USART1_IDLE (1u << 7)
 #define Event_USART3_IDLE (1u << 8)
 
-typedef enum
-{
-    SCENE_LESSLIGHT = 0,
-    SCENE_IDLE = 1,
-    SCENE_PLAYING = 2,
-    SCENE_VICTORY = 3,
-}Scene_t;
-
-
 void System_Reset(void);
 void Main_Init(void);
 void Main_Task(void);

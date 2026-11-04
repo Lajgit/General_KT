@@ -1,11 +1,5 @@
 #include "CommTask.h"
-#include "MesgTask.h"
-#include "KeyTask.h"
-#include "MainTask.h"
-#include "LightTask.h"
-#include "FlashTask.h"
 #include "app_crc.h"
-#include "app_list.h"
 #include "port_digitaltube.h"
 #include "string.h"
 #include "usart.h"
@@ -19,15 +13,7 @@ static Mesg_TypeDef Receive_mesg;
 Tx_HandleTypeDef Tx;
 Rx_HandleTypeDef Rx;
 
-extern Event_Handle_t Mesg_event;
 extern DigitalTube_t DigitalTube;
-extern Light_t Light1;
-extern BreathLight_t *BreathList[];
-extern uint8_t LightBelt_Lightness;
-extern uint8_t LightBoard_Lightness;
-extern uint8_t Switch_ID;
-extern Scene_t Scene;
-extern Light_t Light1, Light2;
 
 /// 串口消息验证
 static bool USART_ReceiveMesg_Verify(void *self, void *mesg)
@@ -41,7 +27,7 @@ static bool USART_ReceiveMesg_Verify(void *self, void *mesg)
         return true;
     return false;
 }
-/// 串口1消息处理
+/// USART2 消息处理
 static void USART_Deal(void *Rx_mesg)
 {
     Mesg_TypeDef *mesg = (Mesg_TypeDef *)Rx_mesg;
@@ -51,32 +37,15 @@ static void USART_Deal(void *Rx_mesg)
         {
         /// 数码管
         case 0x01:
-            uint32_t data = mesg->Data1 << 24 | mesg->Data2 << 16 | mesg->Data3 << 8 | mesg->Data4;
+        {
+            /* 先转为无符号数再移位，支持完整 32 位下发值。 */
+            uint32_t data = (uint32_t)mesg->Data1 << 24 | (uint32_t)mesg->Data2 << 16
+                            | (uint32_t)mesg->Data3 << 8 | mesg->Data4;
             DigitalTube.Set_Num(&DigitalTube, 0, data, 4);
             DigitalTube.Refresh(&DigitalTube);
             break;
-            /// 灯带亮度
-        case 0x02:
-            LightBelt_Lightness = mesg->Data4;
-            break;
-            /// 场景
-        case 0x03:
-            if (mesg->Data4 <= SCENE_VICTORY)
-            {
-                Scene = (Scene_t)mesg->Data4;
-                CtrlLightGroup_ClearAll();
-            }
-            break;
-            /// 灯板亮度
-        case 0x04:
-            LightBoard_Lightness = mesg->Data4;
-            Light1.Init = true;
-            Light2.Init = true;
-            break;
-            /// 控台灯光分组
-        case 0x05:
-            CtrlLightGroup_Set(mesg->Data3, mesg->Data4, mesg->ExpandCode);
-            break;
+        }
+        /* 通用控台没有 RGB 灯，旧灯光指令统一忽略。 */
         default:
             break;
         }
@@ -128,11 +97,12 @@ uint8_t Comm_SendMesg_FillData(Tx_HandleTypeDef *Tx, uint8_t code_1, uint8_t cod
 void CommInit(void)
 {
 
-    Rx_InitTypeDef Rxinit;
+    Rx_InitTypeDef Rxinit = {0};
 
-    Rxinit.huart = &huart3;
+    Rxinit.huart = &huart2;
     Rxinit.RingBuf = rx_buffer;
     Rxinit.RingBuf_Size = sizeof(rx_buffer);
+    Rxinit.Mesg_Len = sizeof(Mesg_TypeDef); // 固定 14 字节协议帧
     Rxinit.Frame_Head = Mesg_Head;
     Rxinit.Frame_Tail = Mesg_Tail;
     Rxinit.Receive = Rx_Receive;
@@ -141,7 +111,7 @@ void CommInit(void)
     Communicate_Rx_Init(&Rx, Rxinit);
 
     Tx_InitTypeDef Tx_init;
-    Tx_init.huart = &huart3;
+    Tx_init.huart = &huart2;
     Tx_init.hdma = NULL;
     Tx_init.TxBuf = NULL;
     Tx_init.TxBuf_Size = 0;
