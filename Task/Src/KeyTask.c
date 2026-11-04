@@ -3,6 +3,7 @@
 #include "MainTask.h"
 #include "CommTask.h"
 #include "port_key.h"
+#include "port_joystick.h"
 #include "port_event.h"
 
 static GPIO_TypeDef *Button_GPIO[6] = {Button1_GPIO_Port, Button2_GPIO_Port, Button3_GPIO_Port, Button4_GPIO_Port, Button5_GPIO_Port, Button6_GPIO_Port};
@@ -21,6 +22,14 @@ extern Event_Handle_t Mesg_event;
 extern Event_Handle_t Event;
 
 extern Tx_HandleTypeDef Tx;
+
+/* 摇杆独立于普通按键扫描，避免斜向被拆成两条单方向消息。 */
+static Joystick_Handle_t Joystick;
+
+static void Joystick_Callback(uint8_t direction, uint8_t event)
+{
+    Comm_SendMesg_FillData(&Tx, Ctrl_to_Board, 0x04, direction, event);
+}
 
 /// ----------按键初始化----------
 static void Button_ShortCallback(uint16_t id)
@@ -84,6 +93,7 @@ void KeyAll_Init(void)
 {
     Button_Init();
     Keyboard_Init();
+    Joystick_Init(&Joystick, Joystick_Callback);
 }
 
 void Key_Task(void)
@@ -91,4 +101,5 @@ void Key_Task(void)
     /* 按原理图扫描全部六路拍拍按键和两路扩展按键。 */
     Key_Scan(Button_List, 6);
     Key_Scan(Keyboard_List, 2);
+    Joystick_Scan(&Joystick);
 }

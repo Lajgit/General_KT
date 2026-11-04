@@ -662,6 +662,11 @@
               <FilePath>..\Mid\Src\port_flash.c</FilePath>
             </File>
             <File>
+              <FileName>port_joystick.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Mid\Src\port_joystick.c</FilePath>
+            </File>
+            <File>
               <FileName>port_key.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Mid\Src\port_key.c</FilePath>

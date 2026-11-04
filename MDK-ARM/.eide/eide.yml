@@ -69,6 +69,7 @@ virtualFolder:
         - path: ../Mid/Src/port_digitaltube.c
         - path: ../Mid/Src/port_event.c
         - path: ../Mid/Src/port_flash.c
+        - path: ../Mid/Src/port_joystick.c
         - path: ../Mid/Src/port_key.c
       folders: []
     - name: Task
