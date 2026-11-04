@@ -58,7 +58,8 @@ void Error_Handler(void);
 
 /* Private defines -----------------------------------------------------------*/
 /* 通用控台原理图：输入均由外部电阻上拉，按下为低电平。 */
-#define LED_Pin GPIO_PIN_0
+/* User_Led 接 PA1（芯片第 11 脚），低电平点亮。 */
+#define LED_Pin GPIO_PIN_1
 #define LED_GPIO_Port GPIOA
 #define Encoder_A_Pin GPIO_PIN_8
 #define Encoder_A_GPIO_Port GPIOA
